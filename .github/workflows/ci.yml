@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Weekly: catch breakage from new inspect-robots or wandb releases.
+    - cron: "0 6 * * 1"
+
+jobs:
+  test:
+    name: test · py${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --locked --python ${{ matrix.python }} --extra dev
+      - run: uv run --no-sync ruff check .
+      - run: uv run --no-sync ruff format --check .
+      - run: uv run --no-sync mypy
+      - run: uv run --no-sync pytest -q
+
+  # Tests run against an SDK double, so CI never needs network access or W&B
+  # credentials. This job checks the sink against unreleased core changes.
+  core-main:
+    name: test · inspect-robots main
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --locked --python 3.12 --extra dev
+      - run: >
+          uv run --with "inspect-robots @ git+https://github.com/robocurve/inspect-robots@main"
+          pytest -q -rs

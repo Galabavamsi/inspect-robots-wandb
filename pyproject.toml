@@ -1,0 +1,105 @@
+[build-system]
+requires = ["hatchling>=1.18", "hatch-fancy-pypi-readme>=24.1"]
+build-backend = "hatchling.build"
+
+[project]
+name = "inspect-robots-wandb"
+version = "0.1.0"
+description = "Weights & Biases logging sink for Inspect Robots evaluations."
+dynamic = ["readme"]
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{ name = "GALABA VAMSI" }]
+keywords = ["robotics", "evaluation", "wandb", "weights-and-biases", "inspect_robots"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
+]
+dependencies = [
+    # Older cores work, but only cores with the optional on_eval_error sink
+    # hook close the W&B run when an evaluation aborts.
+    "inspect-robots>=0.60.0",
+    "wandb>=0.19.10",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-cov>=5.0", "mypy>=1.11", "ruff>=0.6"]
+
+[project.entry-points."inspect_robots.sinks"]
+wandb = "inspect_robots_wandb:WandbSink"
+
+[project.urls]
+Homepage = "https://github.com/Galabavamsi/inspect-robots-wandb"
+Repository = "https://github.com/Galabavamsi/inspect-robots-wandb"
+Issues = "https://github.com/Galabavamsi/inspect-robots-wandb/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/inspect_robots_wandb"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/inspect_robots_wandb", "tests", "README.md", "LICENSE"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM", "RUF", "D1"]
+ignore = ["B008", "D105", "D107"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["inspect_robots", "inspect_robots_wandb"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D1"]
+
+[tool.mypy]
+strict = true
+python_version = "3.10"
+files = ["src", "tests"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=inspect_robots_wandb --cov-report=term-missing --cov-fail-under=100"
+
+[tool.coverage.run]
+branch = true
+
+[[tool.mypy.overrides]]
+module = ["wandb.*"]
+ignore_missing_imports = true
+
+[tool.hatch.metadata.hooks.fancy-pypi-readme]
+content-type = "text/markdown"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "README.md"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.substitutions]]
+pattern = '(?m)^> \[!NOTE\][ \t]*$'
+replacement = '> **Note:**'
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.substitutions]]
+pattern = '(?m)^> \[!TIP\][ \t]*$'
+replacement = '> **Tip:**'
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.substitutions]]
+pattern = '(?m)^> \[!IMPORTANT\][ \t]*$'
+replacement = '> **Important:**'
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.substitutions]]
+pattern = '(?m)^> \[!WARNING\][ \t]*$'
+replacement = '> **Warning:**'
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.substitutions]]
+pattern = '(?m)^> \[!CAUTION\][ \t]*$'
+replacement = '> **Caution:**'
